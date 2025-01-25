@@ -3,7 +3,7 @@ from .models import User
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import db   ##means from __init__.py import db
 from flask_login import login_user, login_required, logout_user, current_user
-
+from .rsa_encryption import RSA_encrypt, RSA_decrypt
 
 auth = Blueprint('auth', __name__)
 
@@ -14,9 +14,14 @@ def login():
         email = request.form.get('email')
         password = request.form.get('password')
 
+        # Load private key
+        with open("website/private_key.txt", "r") as priv_file:
+            n, d = map(int, priv_file.read().split())
+
         user = User.query.filter_by(email=email).first()
         if user:
-            if check_password_hash(user.password, password):
+            decrypted_password = RSA_decrypt(user.password, n, d)
+            if decrypted_password.strip() == password:
                 flash('Logged in successfully!', category='success')
                 login_user(user, remember=True)
                 return redirect(url_for('views.home'))
@@ -43,6 +48,10 @@ def sign_up():
         password1 = request.form.get('password1')
         password2 = request.form.get('password2')
 
+        # Load public key
+        with open("website/public_key.txt", "r") as pub_file:
+            n, e = map(int, pub_file.read().split())
+
         user = User.query.filter_by(email=email).first()
         if user:
             flash('Email already exists.', category='error')
@@ -55,8 +64,8 @@ def sign_up():
         elif len(password1) < 7:
             flash('Password must be at least 7 characters.', category='error')
         else:
-            new_user = User(email=email, first_name=first_name, password=generate_password_hash(
-                password1, method='pbkdf2:sha256'))
+            encrypted_password = RSA_encrypt(password1, n, e)
+            new_user = User(email=email, first_name=first_name, password=encrypted_password)
             db.session.add(new_user)
             db.session.commit()
             login_user(new_user, remember=True)
