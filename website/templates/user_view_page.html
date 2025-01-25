@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Account Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 h-screen flex items-center justify-center">
+    <div class="bg-white shadow-md rounded-lg p-6 max-w-md w-full">
+        <h1 class="text-2xl font-bold text-gray-800 mb-4">Account Details</h1>
+        <div class="mb-4">
+            <label class="block text-gray-700 font-medium">Account Number:</label>
+            <p class="text-gray-900 text-lg">{{ account_number }}</p>
+        </div>
+        <div class="mb-4">
+            <label class="block text-gray-700 font-medium">Balance:</label>
+            <p class="text-gray-900 text-lg">{{ balance }}</p>
+        </div>
+        <div class="mb-4">
+            <label class="block text-gray-700 font-medium">Currency:</label>
+            <p class="text-gray-900 text-lg">{{ currency }}</p>
+        </div>
+        <div class="mt-4">
+            <a href="/logout" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">
+                Logout
+            </a>
+        </div>
+    </div>
+</body>
+</html>
