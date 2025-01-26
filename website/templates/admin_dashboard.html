@@ -1,10 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends "base_admin.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex flex-column align-items-center" style="height: 100vh; font-family: Arial, sans-serif;">
+    <!-- Box pentru Admin Dashboard -->
+    <div class="card shadow p-4 text-center mb-4" style="max-width: 600px; width: 100%; margin-top: 10vh;">
+        <h2 class="mb-0">Admin Dashboard</h2>
+    </div>
+
+    <!-- Butoane pentru Create User si Create Account -->
+    <div class="mb-4">
+        <a class="btn btn-primary btn-lg mx-2" href="/create-user">Create User</a>
+        <a class="btn btn-secondary btn-lg mx-2" href="/create-account">Create Account</a>
+    </div>
+</div>
+{% endblock %}

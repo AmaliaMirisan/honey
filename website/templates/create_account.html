@@ -1,10 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends "base_admin.html" %}
+
+{% block title %}Create Account{% endblock %}
+
+{% block admin_content %}
+<div class="card shadow p-4" style="max-width: 500px; margin: 10vh auto;">
+    <h3 class="text-center mb-4">Create Account</h3>
+    <form method="POST" action="{{ url_for('auth.create_account') }}">
+        <div class="form-group">
+            <label for="user_id">User ID</label>
+            <input type="number" class="form-control" id="user_id" name="user_id" placeholder="Enter user ID" required>
+        </div>
+        <div class="form-group">
+            <label for="balance">Balance</label>
+            <input type="number" step="0.01" class="form-control" id="balance" name="balance" placeholder="Enter balance" required>
+        </div>
+        <div class="form-group">
+            <label for="currency">Currency</label>
+            <input type="text" class="form-control" id="currency" name="currency" placeholder="Enter currency" required>
+        </div>
+        <div class="form-group">
+            <label for="account_number">Account Number</label>
+            <input type="text" class="form-control" id="account_number" name="account_number" placeholder="Enter account number" required>
+        </div>
+        <button type="submit" class="btn btn-secondary btn-block">Create Account</button>
+    </form>
+</div>
+{% endblock %}

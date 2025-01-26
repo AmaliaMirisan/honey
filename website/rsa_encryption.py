@@ -165,3 +165,7 @@ def validate(word):
     allowed_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+[]{}|\\:;\"'<>,.?/ "
     return all(c in allowed_chars for c in word)
 
+def get_public_key():
+    with open("website/public_key.txt", "r") as pub_file:
+        n, e = map(int, pub_file.read().split())
+    return n, e
