@@ -1,8 +1,7 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
-from .models import User, Account, Transaction
-from werkzeug.security import generate_password_hash, check_password_hash
+from .models import User, Account, Transactions
 from . import db   ##means from __init__.py import db
-from flask_login import login_user, login_required, logout_user, current_user
+from flask_login import login_user, login_required, logout_user
 from .rsa_encryption import RSA_encrypt, RSA_decrypt, get_public_key
 from flask_login import current_user
 
@@ -57,6 +56,7 @@ def login():
         user = User.query.filter_by(email=email).first()
         if user:
             decrypted_password = RSA_decrypt(user.password, n, d)
+            print(decrypted_password + " is decrypted")
             if decrypted_password.strip() == password:
                 flash('Logged in successfully!', category='success')
                 login_user(user, remember=True)
@@ -284,7 +284,7 @@ def transaction():
         to_account.balance += amount
 
         # Cream tranzactia
-        new_transaction = Transaction(
+        new_transaction = Transactions(
             account_id_from=from_account.id,
             account_id_to=to_account_id,
             amount=amount

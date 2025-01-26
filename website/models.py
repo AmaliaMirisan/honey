@@ -37,13 +37,12 @@ class User(db.Model, UserMixin):
     def in_honey_words(self, text):
         return text in self.honey_words
 
-class Transaction(db.Model):
+class Transactions(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     account_id_from = db.Column(db.Integer, db.ForeignKey('account.id'))
     account_id_to = db.Column(db.Integer, db.ForeignKey('account.id'))
     amount = db.Column(db.Float)
-    date = db.Column(db.DateTime(timezone=True), default=func.now())
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    timestamp = db.Column(db.DateTime(timezone=True), default=func.now())
 
     from_account = db.relationship(
         "Account",
@@ -64,14 +63,14 @@ class Account(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     account_number = db.Column(db.String(150))
     outgoing_transactions = db.relationship(
-        "Transaction",
-        foreign_keys="Transaction.account_id_from",
+        "Transactions",
+        foreign_keys="Transactions.account_id_from",
         back_populates="from_account"
     )
 
     # Transactions where this account is the receiver
     incoming_transactions = db.relationship(
-        "Transaction",
-        foreign_keys="Transaction.account_id_to",
+        "Transactions",
+        foreign_keys="Transactions.account_id_to",
         back_populates="to_account"
     )
