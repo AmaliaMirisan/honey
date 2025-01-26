@@ -1,6 +1,5 @@
 .idea
 .vscode
 website/__pycache__
-website/database.db
 venv/
 .idea/
