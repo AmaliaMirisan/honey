@@ -3,29 +3,67 @@
 {% block title %}Transactions{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h2 class="text-center mb-4">All Transactions</h2>
-    <table class="table table-striped table-bordered">
-        <thead class="thead-dark">
-            <tr>
-                <th>Transaction ID</th>
-                <th>From Account</th>
-                <th>To Account</th>
-                <th>Amount</th>
-                <th>Date</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for transaction in transactions %}
-            <tr>
-                <td>{{ transaction.id }}</td>
-                <td>{{ transaction.account_id_from }}</td>
-                <td>{{ transaction.account_id_to }}</td>
-                <td>{{ transaction.amount }}</td>
-                <td>{{ transaction.timestamp }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+<div class="d-flex flex-column align-items-center justify-content-center" style="min-height: 80vh;">
+    <div class="card shadow p-4" style="max-width: 500px; width: 100%; border-radius: 15px;">
+    <!-- Display an error message if it exists -->
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+
+    <!-- Display Incoming Transactions -->
+    <h2>Incoming Transactions</h2>
+    {% if incoming_transactions %}
+        <table>
+            <thead>
+                <tr>
+                    <th>From Account</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in incoming_transactions %}
+                    <tr>
+                        <td>{{ transaction.account_id_from }}</td>
+                        <td>{{ transaction.amount }}</td>
+                        <td>{{ transaction.timestamp }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No incoming transactions found.</p>
+    {% endif %}
+
+    <!-- Display Outgoing Transactions -->
+    <h2>Outgoing Transactions</h2>
+    {% if outgoing_transactions %}
+        <table>
+            <thead>
+                <tr>
+                    <th>To Account</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in outgoing_transactions %}
+                    <tr>
+                        <td>{{ transaction.account_id_to }}</td>
+                        <td>{{ transaction.amount }}</td>
+                        <td>{{ transaction.timestamp }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No outgoing transactions found.</p>
+    {% endif %}
+        <div class="text-center mt-4">
+            <a href="{{ url_for('auth.account') }}" class="btn btn-primary btn-block">
+                Back to account details
+            </a>
+        </div>
+        </div>
+    </div>
 {% endblock %}

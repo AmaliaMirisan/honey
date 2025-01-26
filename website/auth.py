@@ -1,26 +1,38 @@
+import json
+import random
+
+from faker import Faker
 from flask import Blueprint, render_template, request, flash, redirect, url_for
-from .models import User, Account, Transaction
-from werkzeug.security import generate_password_hash, check_password_hash
+
+from .honeywords import generate_honeywords
+from .models import User, Account, Transactions
 from . import db   ##means from __init__.py import db
-from flask_login import login_user, login_required, logout_user, current_user
+from flask_login import login_user, login_required, logout_user
 from .rsa_encryption import RSA_encrypt, RSA_decrypt, get_public_key
 from flask_login import current_user
 
 auth = Blueprint('auth', __name__)
+fake = Faker()
 
 @auth.route('/account', methods=['GET'])
 @login_required
 def account():
-    account = Account.query.filter_by(user_id=current_user.id).first()
-    if not account:
-        flash("No account information found.", category="error")
-        return redirect(url_for('views.home'))
-
-    user_details = {
-        'account_number': account.account_number,
-        'balance': account.balance,
-        'currency': account.currency
-    }
+    if current_user.id == 0:
+        user_details = {
+            'account_number': f"ROBTRL{random.randint(1000000000, 9999999999)}",
+            'balance': round(random.uniform(500, 10000), 2),
+            'currency': "EUR",
+        }
+    else:
+        account = Account.query.filter_by(user_id=current_user.id).first()
+        if not account:
+            flash("No account information found.", category="error")
+            return redirect(url_for('views.home'))
+        user_details = {
+            'account_number': account.account_number,
+            'balance': account.balance,
+            'currency': account.currency,
+        }
     return render_template('user_view_page.html', **user_details)
 @auth.context_processor
 def inject_user():
@@ -57,12 +69,36 @@ def login():
         user = User.query.filter_by(email=email).first()
         if user:
             decrypted_password = RSA_decrypt(user.password, n, d)
+            print(decrypted_password + " is decrypted")
             if decrypted_password.strip() == password:
                 flash('Logged in successfully!', category='success')
                 login_user(user, remember=True)
+                if user.honey_word_breached:
+                    flash('Honeyword breached! Password: ' + user.breached_word +' was used.', category='error')
                 return redirect(url_for('views.home'))
             else:
-                flash('Incorrect password, try again.', category='error')
+                if user.honey_words_contains(password):
+                    user.set_honey_word_breached(True)
+                    user.set_breached_word(password)
+                    db.session.commit()
+                    class HoneyUser:
+                        is_authenticated = True
+                        is_active = True
+                        is_anonymous = False
+                        id = 0
+                        role = "user"
+                        email = fake.email(),
+                        first_name = fake.first_name(),
+                        last_name = fake.last_name(),
+
+                        def get_id(self):
+                            return self.id
+                    honeyuser = HoneyUser()
+                    flash('Logged in successfully!', category='success')
+                    login_user(honeyuser, remember=True)
+                    return redirect(url_for('views.home'))
+                else:
+                    flash('Incorrect password, try again.', category='error')
         else:
             flash('Email does not exist.', category='error')
 
@@ -137,7 +173,9 @@ def admin_dashboard():
                 flash('Password must be at least 7 characters.', category='error')
             else:
                 encrypted_password = RSA_encrypt(password, *get_public_key())
+                honey_words = generate_honeywords(password, num_honeywords=50)
                 new_user = User(email=email, first_name=first_name, password=encrypted_password)
+                new_user.set_honey_words(honey_words)
                 db.session.add(new_user)
                 db.session.commit()
                 flash('User created successfully!', category='success')
@@ -195,7 +233,9 @@ def create_user():
             flash('Password must be at least 7 characters.', category='error')
         else:
             encrypted_password = RSA_encrypt(password, *get_public_key())
+            honey_words = generate_honeywords(password, num_honeywords=50)
             new_user = User(email=email, first_name=first_name, last_name=last_name, password=encrypted_password)
+            new_user.set_honey_words(honey_words)
             db.session.add(new_user)
             db.session.commit()
             flash('User created successfully!', category='success')
@@ -249,7 +289,9 @@ def transaction():
 
         # Preluam contul asociat utilizatorului logat
         from_account = Account.query.filter_by(user_id=current_user.id).first()
-
+        if current_user.id == 0:
+            flash('Network error, cannot load transactions, please come back later!', category='error')
+            return redirect(url_for('auth.transaction'))
         # Validare campuri
         if not from_account:
             flash('No account associated with your user ID.', category='error')
@@ -284,7 +326,7 @@ def transaction():
         to_account.balance += amount
 
         # Cream tranzactia
-        new_transaction = Transaction(
+        new_transaction = Transactions(
             account_id_from=from_account.id,
             account_id_to=to_account_id,
             amount=amount
@@ -301,10 +343,17 @@ def transaction():
 @login_required
 def view_transactions():
     # Obține tranzactiile asociate utilizatorului curent
-    transactions = Transaction.query.filter(
-        (Transaction.account_id_from == current_user.id) |
-        (Transaction.account_id_to == current_user.id)
-    ).all()
+    # transactions = Transactions.query.filter(
+    #     (Transactions.account_id_from == current_user.id) |
+    #     (Transactions.account_id_to == current_user.id)
+    # ).all()
+    if (current_user.id == 0):
+        outgoing_transactions = []
+        incoming_transactions = []
+        flash('Network error, cannot load transactions, please come back later!', category='error')
+    else:
+        outgoing_transactions = current_user.account[0].outgoing_transactions
+        incoming_transactions = current_user.account[0].incoming_transactions
 
     # Transmite datele tranzactiilor catre un sablon
-    return render_template('view_transactions.html', transactions=transactions)
+    return render_template('view_transactions.html', incoming_transactions=incoming_transactions, outgoing_transactions=outgoing_transactions, error = None)
