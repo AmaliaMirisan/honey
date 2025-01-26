@@ -2,14 +2,32 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from os import path
 from flask_login import LoginManager
+import os
 
 db = SQLAlchemy()
 DB_NAME = "database.db"
+def load_admin(id):
+    if id == "sysadmin":
+        # Creează un obiect temporar pentru sysadmin
+        class AdminUser:
+            is_authenticated = True
+            is_active = True
+            is_anonymous = False
+            id = "sysadmin"
+            role = "admin"  # Rol specific pentru sysadmin
+
+            def get_id(self):
+                return self.id
+
+        return AdminUser()
+
+    return None
 
 
 def create_app():
     app = Flask(__name__)
-    app.config['SECRET_KEY'] = 'hjshjhdjah kjshkjdhjs'
+    # genereaza o cheie secreta diferita la fiecare repornire
+    app.config['SECRET_KEY'] = os.urandom(24)
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
     db.init_app(app)
 
@@ -30,10 +48,15 @@ def create_app():
 
     @login_manager.user_loader
     def load_user(id):
+        # verifica daca este utilizatorul sysadmin
+        admin_user = load_admin(id)
+        if admin_user:
+            return admin_user
+
+        # Pentru utilizatorii din baza de date
         return User.query.get(int(id))
 
     return app
-
 
 
 def create_database(app):

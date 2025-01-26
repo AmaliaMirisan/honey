@@ -1,10 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Make a Transaction{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column align-items-center justify-content-center" style="height: 100vh;">
+    <div class="card shadow p-4" style="max-width: 400px; width: 100%;">
+        <h2 class="text-center mb-4">Make a Transaction</h2>
+        <form method="POST">
+            <div class="form-group">
+                <label for="account_id_to">To Account ID</label>
+                <input type="number" class="form-control" id="account_id_to" name="account_id_to" placeholder="Enter recipient's account ID" required>
+            </div>
+            <div class="form-group">
+                <label for="amount">Amount</label>
+                <input type="number" step="0.01" class="form-control" id="amount" name="amount" placeholder="Enter amount" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Submit Transaction</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
