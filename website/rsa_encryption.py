@@ -164,3 +164,4 @@ def RSA_decrypt(word, n, d):
 def validate(word):
     allowed_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+[]{}|\\:;\"'<>,.?/ "
     return all(c in allowed_chars for c in word)
+
