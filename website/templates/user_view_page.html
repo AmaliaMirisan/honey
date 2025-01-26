@@ -18,6 +18,12 @@
             <label style="font-weight: bold; color: #555;">Currency:</label>
             <p style="font-size: 1.2rem; color: #333;">{{ currency }}</p>
         </div>
+        <!-- Buton pentru vizualizarea tranzactiilor -->
+        <div class="text-center mt-4">
+            <a href="{{ url_for('auth.view_transactions') }}" class="btn btn-primary btn-block">
+                View All Transactions
+            </a>
+        </div>
     </div>
 </div>
 {% endblock %}

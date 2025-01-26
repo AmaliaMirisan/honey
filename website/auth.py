@@ -296,3 +296,15 @@ def transaction():
         return redirect(url_for('auth.transaction'))
 
     return render_template('transaction.html')
+
+@auth.route('/transactions', methods=['GET'])
+@login_required
+def view_transactions():
+    # Obține tranzactiile asociate utilizatorului curent
+    transactions = Transaction.query.filter(
+        (Transaction.account_id_from == current_user.id) |
+        (Transaction.account_id_to == current_user.id)
+    ).all()
+
+    # Transmite datele tranzactiilor catre un sablon
+    return render_template('view_transactions.html', transactions=transactions)
