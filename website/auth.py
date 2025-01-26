@@ -301,9 +301,9 @@ def transaction():
 @login_required
 def view_transactions():
     # Obține tranzactiile asociate utilizatorului curent
-    transactions = Transaction.query.filter(
-        (Transaction.account_id_from == current_user.id) |
-        (Transaction.account_id_to == current_user.id)
+    transactions = Transactions.query.filter(
+        (Transactions.account_id_from == current_user.id) |
+        (Transactions.account_id_to == current_user.id)
     ).all()
 
     # Transmite datele tranzactiilor catre un sablon
