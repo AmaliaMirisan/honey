@@ -1,4 +1,6 @@
 from datetime import datetime
+import json
+from sqlalchemy import JSON
 
 from . import db
 from flask_login import UserMixin
@@ -19,23 +21,35 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(150))
     first_name = db.Column(db.String(150))
     last_name = db.Column(db.String(150))
-    honey_words = db.Column(ARRAY(db.String(150)))
+    honey_words = db.Column(JSON)
     date_created = db.Column(
         db.DateTime(timezone=True), default=func.now()
     )
+    honey_word_breached = db.Column(db.Boolean, default=False)
+    breached_word = db.Column(db.String(150))
     account = db.relationship('Account', backref='user', lazy=True, foreign_keys='Account.user_id')
 
-    def set_honey_words(self, words):
-        if isinstance(words, list) and all(isinstance(word, str) for word in words):
-            self.honey_words = words
-        else:
-            raise ValueError("Honey words must be a list of strings.")
+    def set_honey_words(self, word_list):
+        self.honey_words = json.dumps(word_list)
 
-    def get_honey_words(self):
-        return self.honey_words
+    @property
+    def honey_words_as_list(self):
+        return json.loads(self.honey_words)
 
-    def in_honey_words(self, text):
-        return text in self.honey_words
+    @honey_words_as_list.setter
+    def honey_words_as_list(self, value):
+        self.honey_words = json.dumps(value)
+
+    def honey_words_contains(self, word):
+        print(self.honey_words)
+        return word in self.honey_words
+
+    def set_honey_word_breached(self, breached):
+        self.honey_word_breached = breached
+    def set_breached_word(self, word):
+        self.breached_word = word
+
+
 
 class Transactions(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -57,7 +71,6 @@ class Transactions(db.Model):
 
 class Account(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(150))
     balance = db.Column(db.Float)
     currency = db.Column(db.String(150))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -67,8 +80,6 @@ class Account(db.Model):
         foreign_keys="Transactions.account_id_from",
         back_populates="from_account"
     )
-
-    # Transactions where this account is the receiver
     incoming_transactions = db.relationship(
         "Transactions",
         foreign_keys="Transactions.account_id_to",

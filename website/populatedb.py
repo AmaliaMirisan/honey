@@ -38,22 +38,22 @@ def populate_database():
         print("Adding users and account...")
         users = []
         account = []
-        encrypted_password = RSA_encrypt("password123", *get_public_key())
+        encrypted_password = RSA_encrypt("password", *get_public_key())
         for _ in range(50):
             email = fake.email()
             first_name = fake.first_name()
             last_name = fake.last_name()
-            password = "password123"
+            password = "password"
             honey_words = json.dumps(generate_honey_words(password))
             date_created = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
             # Insert user into the users table
             cursor.execute(
                 """
-                INSERT INTO user (email, first_name, last_name, password, date_created, honey_words)
-                VALUES ( ?, ?, ?, ?, ?, ?);
+                INSERT INTO user (email, first_name, last_name, password, date_created, honey_words, honey_word_breached, breached_word)
+                VALUES ( ?, ?, ?, ?, ?, ?, ?, ?);
                 """,
-                (email, first_name, last_name, encrypted_password, date_created, honey_words)
+                (email, first_name, last_name, encrypted_password, date_created, honey_words, False, None)
             )
             user_id = cursor.lastrowid
 

@@ -1,3 +1,4 @@
+import faker
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from os import path
@@ -6,6 +7,8 @@ import os
 
 db = SQLAlchemy()
 DB_NAME = "database.db"
+
+fake = faker.Faker()
 def load_admin(id):
     if id == "sysadmin":
         # Creează un obiect temporar pentru sysadmin
@@ -22,6 +25,22 @@ def load_admin(id):
         return AdminUser()
 
     return None
+
+def load_honey_user(id):
+    if id == 0:
+        class HoneyUser:
+            is_authenticated = True
+            is_active = True
+            is_anonymous = False
+            id = 0
+            role = "user"
+            email = fake.email()
+            first_name = fake.first_name()
+            last_name = fake.last_name()
+
+            def get_id(self):
+                return self.id
+        return HoneyUser()
 
 
 def create_app():
@@ -52,7 +71,9 @@ def create_app():
         admin_user = load_admin(id)
         if admin_user:
             return admin_user
-
+        honey_user = load_honey_user(id)
+        if honey_user:
+            return honey_user
         # Pentru utilizatorii din baza de date
         return User.query.get(int(id))
 
